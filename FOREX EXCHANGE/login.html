@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Trading Platform</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #021a3d;
+            color: white;
+            text-align: center;
+        }
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 170, 255, 0.1);
+            padding: 15px 30px;
+            backdrop-filter: blur(10px);
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+        }
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 80vh;
+            flex-direction: column;
+        }
+        .login-box {
+            background: rgba(0, 170, 255, 0.2);
+            padding: 50px;
+            border-radius: 10px;
+            width: 350px;
+            text-align: center;
+            box-shadow: 0 0 15px rgba(0, 170, 255, 0.5);
+        }
+        .login-box input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+        }
+        .login-box button {
+            background: linear-gradient(90deg, #005bbb, #00aaff);
+            border: none;
+            padding: 15px 30px;
+            margin-top: 10px;
+            cursor: pointer;
+            font-size: 18px;
+            color: white;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+        .login-box button:hover {
+            background: linear-gradient(90deg, #00aaff, #005bbb);
+        }
+        .footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: rgba(0, 170, 255, 0.1);
+            padding: 10px;
+        }
+        .error, .success {
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        .error { color: red; }
+        .success { color: #00ff00; }
+        .forgot-password {
+            color: #00aaff;
+            cursor: pointer;
+            display: block;
+            margin-top: 10px;
+            text-decoration: underline;
+        }
+        .forgot-password:hover {
+            color: #0088cc;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <a href="index.html">Home</a>
+    </div>
+    <div class="container">
+        <div class="login-box">
+            <h2>Login</h2>
+            <form id="login-form">
+                <input type="email" id="email" placeholder="Email" required><br>
+                <input type="password" id="password" placeholder="Password" required><br>
+                <button type="submit">Login</button>
+                <p class="error" id="error-message"></p>
+                <a class="forgot-password" id="forgot-password">Forgot Password?</a>
+                <p class="success" id="success-message"></p>
+            </form>
+        </div>
+    </div>
+    <div class="footer">&copy; 2025 Trading Platform. All rights reserved.</div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCf5U2LYtLLOYwLdCr3g24moE8VSUmAkJ4",
+            authDomain: "forex-exchange-8421.firebaseapp.com",
+            projectId: "forex-exchange-8421",
+            storageBucket: "forex-exchange-8421.appspot.com",
+            messagingSenderId: "399357419450",
+            appId: "1:399357419450:web:b580e572b77d69bc388783",
+            measurementId: "G-XFP08Q6TKF"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Handle login
+        document.getElementById("login-form").addEventListener("submit", function(event) {
+            event.preventDefault();
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            const errorMessage = document.getElementById("error-message");
+
+            signInWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    console.log("Login Successful!", user);
+                    window.location.href = "dashboard.html"; // Redirect to Dashboard
+                })
+                .catch((error) => {
+                    console.error(error.message);
+                    errorMessage.textContent = "Invalid email or password. Try again.";
+                });
+        });
+
+        // Handle forgot password
+        document.getElementById("forgot-password").addEventListener("click", function() {
+            const email = prompt("Enter your registered email to reset the password:");
+            const successMessage = document.getElementById("success-message");
+            const errorMessage = document.getElementById("error-message");
+
+            if (email) {
+                sendPasswordResetEmail(auth, email)
+                    .then(() => {
+                        successMessage.textContent = "Password reset email sent! Check your inbox.";
+                        errorMessage.textContent = "";
+                    })
+                    .catch((error) => {
+                        errorMessage.textContent = "Error: " + error.message;
+                        successMessage.textContent = "";
+                    });
+            }
+        });
+    </script>
+</body>
+</html>

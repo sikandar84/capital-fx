@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #021a3d;
+            color: white;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .dashboard-header {
+            background-color: #005bbb;
+            padding: 15px;
+            font-size: 24px;
+            font-weight: bold;
+            border-radius: 5px;
+        }
+        .dashboard-section {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        .box {
+            width: 30%;
+            padding: 20px;
+            margin: 10px;
+            background: rgba(0, 170, 255, 0.3);
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 170, 255, 0.5);
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .box:hover {
+            background: rgba(0, 170, 255, 0.5);
+        }
+        .logout-btn {
+            background-color: red;
+            padding: 10px 20px;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="dashboard-header">Admin Dashboard</div>
+
+        <div class="dashboard-section">
+            <div class="box" onclick="location.href='new_users.html'">
+                <h3>New Users</h3>
+                <p>Manage user accounts and approvals</p>
+            </div>
+            <div class="box" onclick="location.href='admin_demo.html'">
+                <h3>Demo Accounts</h3>
+                <p>View and manage demo trading accounts</p>
+            </div>
+            <div class="box" onclick="location.href='admin_trading.html'">
+                <h3>Trading Accounts</h3>
+                <p>Monitor active trading accounts</p>
+            </div>
+            <div class="box" onclick="location.href='admin_withdrawl.html'">
+                <h3>Withdraw Requests</h3>
+                <p>Approve or reject withdrawal requests</p>
+            </div>
+            <div class="box" onclick="location.href='admin_deposit.html'">
+                <h3>Deposit Requests</h3>
+                <p>Review and confirm deposits</p>
+            </div>
+            <div class="box" onclick="location.href='settings.html'">
+                <h3>Settings</h3>
+                <p>Manage website configurations</p>
+            </div>
+        </div>
+
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+
+    <script>
+        // 🛡️ Security Check: Redirect if not logged in
+        if (sessionStorage.getItem("isAdminLoggedIn") !== "true") {
+            location.href = "admin.html";
+        }
+
+        // 🔒 Logout function
+        function logout() {
+            sessionStorage.removeItem("isAdminLoggedIn");
+            location.href = "admin.html";
+        }
+    </script>
+</body>
+</html>

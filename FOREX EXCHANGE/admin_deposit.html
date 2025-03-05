@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deposit Funds</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #021a3d;
+            color: white;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            padding-top: 60px;
+        }
+
+        .go-back {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: #00aaff;
+            padding: 10px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .go-back:hover {
+            background: #005bbb;
+        }
+
+        table {
+            width: 90%;
+            margin-top: 20px;
+            border-collapse: collapse;
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid white;
+            text-align: center;
+        }
+
+        th {
+            background: rgba(0, 170, 255, 0.5);
+        }
+
+        img {
+            width: 80px;
+            height: 80px;
+            border-radius: 5px;
+            object-fit: cover;
+        }
+
+        .approve {
+            background: #28a745;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .approve:hover {
+            background: #218838;
+        }
+
+        .decline {
+            background: #dc3545;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .decline:hover {
+            background: #c82333;
+        }
+
+        .delete {
+            background: #ff6600;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .delete:hover {
+            background: #cc5200;
+        }
+    </style>
+</head>
+<body>
+    <a href="admin_dashboard.html" class="go-back">⬅ Go Back</a>
+
+    <h2>Deposit Requests</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Email</th>
+                <th>Bank Name</th>
+                <th>Account Number</th>
+                <th>Amount</th>
+                <th>Proof</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="deposit-list"></tbody>
+    </table>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getFirestore, doc, updateDoc, getDocs, deleteDoc, collection } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCf5U2LYtLLOYwLdCr3g24moE8VSUmAkJ4",
+            authDomain: "forex-exchange-8421.firebaseapp.com",
+            projectId: "forex-exchange-8421",
+            storageBucket: "forex-exchange-8421.appspot.com",
+            messagingSenderId: "399357419450",
+            appId: "1:399357419450:web:b580e572b77d69bc388783",
+            measurementId: "G-XFP08Q6TKF"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        async function fetchDeposits() {
+            const depositList = document.getElementById("deposit-list");
+            depositList.innerHTML = "";
+            const querySnapshot = await getDocs(collection(db, "deposits"));
+
+            querySnapshot.forEach((document) => {
+                const deposit = document.data();
+
+                // Use imageUrl directly as stored in Firestore (Google Drive link)
+                const proofImage = deposit.imageUrl ? 
+                    `<a href="${deposit.imageUrl}" target="_blank">
+                        <img src="${deposit.imageUrl}" alt="Proof">
+                    </a>` 
+                    : "No Image";
+
+                const row = `<tr>
+                    <td>${deposit.email}</td>
+                    <td>${deposit.bankName}</td>
+                    <td>${deposit.accountNumber}</td>
+                    <td>${deposit.amount}</td>
+                    <td>${proofImage}</td>
+                    <td>${deposit.status}</td>
+                    <td>
+                        <button class='approve' onclick="updateDeposit('${document.id}', 'approved')">Approve</button>
+                        <button class='decline' onclick="updateDeposit('${document.id}', 'declined')">Decline</button>
+                        <button class='delete' onclick="deleteDeposit('${document.id}')">Delete</button>
+                    </td>
+                </tr>`;
+
+                depositList.innerHTML += row;
+            });
+        }
+
+        window.updateDeposit = async (id, status) => {
+            await updateDoc(doc(db, "deposits", id), { status });
+            fetchDeposits();
+        };
+
+        window.deleteDeposit = async (id) => {
+            if (confirm("Are you sure you want to delete this deposit?")) {
+                await deleteDoc(doc(db, "deposits", id));
+                fetchDeposits();
+            }
+        };
+
+        async function uploadProofImage(file) {
+            if (!file) return null;
+
+            const storageRef = ref(storage, `deposit-proofs/${file.name}`);
+            await uploadBytes(storageRef, file);
+            return await getDownloadURL(storageRef);
+        }
+
+        fetchDeposits();
+    </script>
+</body>
+</html>

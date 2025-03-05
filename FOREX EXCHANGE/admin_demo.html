@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Demo Requests</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #0A1F44, #1E3C72);
+            color: white;
+            text-align: center;
+            padding: 30px;
+        }
+        h2 { color: #FFD700; }
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        th { background: #FFD700; color: #1E3C72; }
+        td { color: white; }
+        .btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .approve { background: #28A745; color: white; }
+        .decline { background: #DC3545; color: white; }
+        .delete { background: #FF5733; color: white; }
+        .approve:hover { background: #218838; }
+        .decline:hover { background: #C82333; }
+        .delete:hover { background: #C70039; }
+    </style>
+</head>
+<body>
+    <h2>Admin Panel - Manage Demo Requests</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Amount (USD)</th>
+                <th>Amount (PKR)</th>
+                <th>Date Requested</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="requests-table"></tbody>
+    </table>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, query, orderBy, onSnapshot, updateDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = { 
+            apiKey: "AIzaSyCf5U2LYtLLOYwLdCr3g24moE8VSUmAkJ4",
+            authDomain: "forex-exchange-8421.firebaseapp.com",
+            projectId: "forex-exchange-8421",
+            storageBucket: "forex-exchange-8421.appspot.com",
+            messagingSenderId: "399357419450",
+            appId: "1:399357419450:web:b580e572b77d69bc388783",
+            measurementId: "G-XFP08Q6TKF"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        function fetchDemoRequests() {
+            const tableBody = document.getElementById("requests-table");
+            const q = query(collection(db, "demoAccounts"), orderBy("timestamp", "desc"));
+
+            onSnapshot(q, (querySnapshot) => {
+                tableBody.innerHTML = "";
+                querySnapshot.forEach(docSnapshot => {
+                    const data = docSnapshot.data();
+                    const date = data.timestamp ? new Date(data.timestamp.toMillis()).toLocaleString() : "N/A";
+                    const statusColor = data.status === "approved" ? "green" : data.status === "rejected" ? "red" : "orange";
+
+                    const row = `
+                        <tr>
+                            <td>${data.fullName}</td>
+                            <td>${data.email}</td>
+                            <td>${data.amountUSD}</td>
+                            <td>${data.amountPKR}</td>
+                            <td>${date}</td>
+                            <td style="color: ${statusColor}; font-weight: bold;">${data.status.toUpperCase()}</td>
+                            <td>
+                                <button class="btn approve" data-id="${docSnapshot.id}" ${data.status !== "pending" ? "disabled" : ""}>✅ Approve</button>
+                                <button class="btn decline" data-id="${docSnapshot.id}" ${data.status !== "pending" ? "disabled" : ""}>❌ Decline</button>
+                                <button class="btn delete" data-id="${docSnapshot.id}">🗑️ Delete</button>
+                            </td>
+                        </tr>
+                    `;
+                    tableBody.innerHTML += row;
+                });
+
+                document.querySelectorAll(".approve").forEach(button => {
+                    button.addEventListener("click", async function() {
+                        const docRef = doc(db, "demoAccounts", this.getAttribute("data-id"));
+                        await updateDoc(docRef, { status: "approved" });
+                    });
+                });
+
+                document.querySelectorAll(".decline").forEach(button => {
+                    button.addEventListener("click", async function() {
+                        const docRef = doc(db, "demoAccounts", this.getAttribute("data-id"));
+                        await updateDoc(docRef, { status: "rejected" });
+                    });
+                });
+
+                document.querySelectorAll(".delete").forEach(button => {
+                    button.addEventListener("click", async function() {
+                        const docRef = doc(db, "demoAccounts", this.getAttribute("data-id"));
+                        if (confirm("Are you sure you want to delete this demo account?")) {
+                            await deleteDoc(docRef);
+                        }
+                    });
+                });
+            });
+        }
+
+        fetchDemoRequests();
+    </script>
+</body>
+</html>

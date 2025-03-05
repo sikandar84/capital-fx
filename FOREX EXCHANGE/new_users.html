@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Users - Admin Panel</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #021a3d;
+            color: white;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .dashboard-header {
+            background-color: #005bbb;
+            padding: 15px;
+            font-size: 24px;
+            font-weight: bold;
+            border-radius: 5px;
+        }
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            border: 1px solid white;
+        }
+        th {
+            background-color: #005bbb;
+        }
+        .logout-btn {
+            background-color: red;
+            padding: 10px 20px;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="dashboard-header">New Users</div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Full Name</th>
+                    <th>Email</th>
+                    <th>Sign-up Date</th>
+                </tr>
+            </thead>
+            <tbody id="users-list">
+                <!-- User data will be added here dynamically -->
+            </tbody>
+        </table>
+
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCf5U2LYtLLOYwLdCr3g24moE8VSUmAkJ4",
+            authDomain: "forex-exchange-8421.firebaseapp.com",
+            projectId: "forex-exchange-8421",
+            storageBucket: "forex-exchange-8421.appspot.com",
+            messagingSenderId: "399357419450",
+            appId: "1:399357419450:web:b580e572b77d69bc388783",
+            measurementId: "G-XFP08Q6TKF"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // 🛡️ Security Check: Redirect if not logged in
+        if (sessionStorage.getItem("isAdminLoggedIn") !== "true") {
+            location.href = "admin.html";
+        }
+
+        // 🔥 Fetch Users from Firestore
+        async function fetchUsers() {
+            const usersList = document.getElementById("users-list");
+            usersList.innerHTML = "<tr><td colspan='3'>Loading...</td></tr>"; // Show loading state
+
+            try {
+                const usersCollection = collection(db, "users");
+                const usersSnapshot = await getDocs(usersCollection);
+                
+                usersList.innerHTML = ""; // Clear table after loading
+                usersSnapshot.forEach((doc) => {
+                    const userData = doc.data();
+                    const signupDate = userData.timestamp ? new Date(userData.timestamp.toDate()).toLocaleDateString() : "N/A";
+                    
+                    const row = `
+                        <tr>
+                            <td>${userData.fullName}</td>
+                            <td>${userData.email}</td>
+                            <td>${signupDate}</td>
+                        </tr>
+                    `;
+                    usersList.innerHTML += row;
+                });
+
+                if (usersSnapshot.empty) {
+                    usersList.innerHTML = "<tr><td colspan='3'>No users found.</td></tr>";
+                }
+            } catch (error) {
+                console.error("Error fetching users:", error);
+                usersList.innerHTML = "<tr><td colspan='3'>Failed to load users.</td></tr>";
+            }
+        }
+
+        // 🔒 Logout function
+        function logout() {
+            sessionStorage.removeItem("isAdminLoggedIn");
+            location.href = "admin.html";
+        }
+
+        // Load Users when page loads
+        fetchUsers();
+    </script>
+</body>
+</html>

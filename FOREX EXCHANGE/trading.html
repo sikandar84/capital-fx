@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trading Account Registration</title>
+    
+    <!-- Bootstrap CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #021a3d;
+            color: white;
+            text-align: center;
+            padding-top: 80px; /* Adjusted for navbar */
+        }
+
+        /* Navbar */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 170, 255, 0.1);
+            padding: 12px 20px;
+            backdrop-filter: blur(10px);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 999;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+        }
+
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+
+        /* Form Container */
+        .container {
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .form-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 0 15px rgba(0, 170, 255, 0.3);
+        }
+
+        input, button {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-size: 14px;
+            text-align: center;
+            border: none;
+            outline: none;
+        }
+
+        button {
+            background: linear-gradient(90deg, #005bbb, #00aaff);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: linear-gradient(90deg, #00aaff, #005bbb);
+            transform: scale(1.05);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            color: black;
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .modal button {
+            background: #005bbb;
+            border: none;
+            padding: 10px;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <div class="navbar">
+        <a href="dashboard.html">⬅ Back to Dashboard</a>
+        <a href="#">Trading Account Registration</a>
+    </div>
+
+    <!-- Form Box -->
+    <div class="container">
+        <div class="form-box">
+            <h2>Trading Account Registration</h2>
+            <form id="trading-form">
+                <input type="text" id="full-name" placeholder="Full Name" required>
+                <input type="text" id="city" placeholder="City" required>
+                <input type="text" id="phone" placeholder="+92" value="+92" required>
+                <input type="email" id="email" placeholder="Email" required>
+
+                <h3>Bank Information</h3>
+                <input type="text" id="bank-account-name" placeholder="Bank Account Name" required>
+                <input type="text" id="account-number" placeholder="Account Number" required>
+                <input type="text" id="bank-iban" placeholder="Bank IBAN (Optional)">
+
+                <h3>CNIC Verification</h3>
+                <input type="text" id="cnic-number" placeholder="CNIC Number" required>
+
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="modal">
+        <div class="modal-content">
+            <p>Your request for a trading account has been submitted. Wait for approval on your email.</p>
+            <button id="closeModalBtn">OK</button>
+        </div>
+    </div>
+
+    <!-- Firebase & Script -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCf5U2LYtLLOYwLdCr3g24moE8VSUmAkJ4",
+            authDomain: "forex-exchange-8421.firebaseapp.com",
+            projectId: "forex-exchange-8421",
+            storageBucket: "forex-exchange-8421.appspot.com",
+            messagingSenderId: "399357419450",
+            appId: "1:399357419450:web:b580e572b77d69bc388783",
+            measurementId: "G-XFP08Q6TKF"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        document.getElementById("trading-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const fullName = document.getElementById("full-name").value;
+            const city = document.getElementById("city").value;
+            const phone = document.getElementById("phone").value;
+            const email = document.getElementById("email").value;
+            const bankAccountName = document.getElementById("bank-account-name").value;
+            const accountNumber = document.getElementById("account-number").value;
+            const bankIban = document.getElementById("bank-iban").value || "N/A"; // Make IBAN optional
+            const cnicNumber = document.getElementById("cnic-number").value;
+
+            try {
+                await setDoc(doc(db, "tradingAccounts", email), {
+                    fullName, city, phone, email,
+                    bankAccountName, accountNumber, bankIban, cnicNumber, status: "pending"
+                });
+
+                // Show the success modal
+                document.getElementById("successModal").style.display = "flex";
+
+                // Clear the form fields after submission
+                document.getElementById("trading-form").reset();
+
+            } catch (error) {
+                console.error("Error saving data: ", error);
+            }
+        });
+
+        // Close Modal
+        document.getElementById("closeModalBtn").addEventListener("click", function() {
+            document.getElementById("successModal").style.display = "none";
+        });
+    </script>
+
+</body>
+</html>

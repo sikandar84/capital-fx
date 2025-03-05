@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trading & Demo Accounts</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #021a3d;
+            color: white;
+            text-align: center;
+        }
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 170, 255, 0.1);
+            padding: 15px 30px;
+            backdrop-filter: blur(10px);
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+        }
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+        .container {
+            margin: 20px;
+        }
+        table {
+            width: 90%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background: rgba(0, 170, 255, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 12px;
+            border: 1px solid rgba(0, 170, 255, 0.5);
+            text-align: center;
+        }
+        th {
+            background: rgba(0, 170, 255, 0.5);
+        }
+    </style>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCf5U2L-YtLLOYwLdCr3g24moE8VSUmAkJ4",
+            authDomain: "forex-exchange-8421.firebaseapp.com",
+            projectId: "forex-exchange-8421",
+            storageBucket: "forex-exchange-8421.appspot.com",
+            messagingSenderId: "399357419450",
+            appId: "1:399357419450:web:b580e572b77d69bc388783",
+            measurementId: "G-XFP08Q6TKF"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        async function loadAccounts() {
+            const tableBody = document.getElementById("accountsTable");
+            tableBody.innerHTML = "";
+            
+            const querySnapshot = await getDocs(collection(db, "tradingDemoAccounts"));
+            querySnapshot.forEach((doc) => {
+                let data = doc.data();
+                let row = `<tr>
+                    <td>${data.fullName}</td>
+                    <td>${data.accountType}</td>
+                    <td>${data.balanceUSD}</td>
+                    <td>${data.timestamp}</td>
+                </tr>`;
+                tableBody.innerHTML += row;
+            });
+        }
+        
+        document.addEventListener("DOMContentLoaded", loadAccounts);
+    </script>
+</head>
+<body>
+    <div class="navbar">
+        <a href="admin_dashboard.html">Back to Dashboard</a>
+    </div>
+    <div class="container">
+        <h2>Trading & Demo Accounts</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Full Name</th>
+                    <th>Account Type</th>
+                    <th>Balance (USD)</th>
+                    <th>Created On</th>
+                </tr>
+            </thead>
+            <tbody id="accountsTable">
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

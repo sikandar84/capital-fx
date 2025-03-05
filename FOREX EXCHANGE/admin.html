@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #021a3d;
+            color: white;
+            text-align: center;
+        }
+        .login-box {
+            background: rgba(0, 170, 255, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            width: 300px;
+            margin: 100px auto;
+            box-shadow: 0 0 15px rgba(0, 170, 255, 0.5);
+        }
+        .input-field {
+            width: 90%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: none;
+            font-size: 16px;
+        }
+        .login-btn {
+            background: linear-gradient(90deg, #005bbb, #00aaff);
+            border: none;
+            padding: 10px 20px;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .login-btn:hover {
+            background: linear-gradient(90deg, #00aaff, #005bbb);
+        }
+        .forgot-password {
+            color: #00aaff;
+            cursor: pointer;
+            display: block;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <h2>Admin Login</h2>
+        <input type="email" id="admin-email" class="input-field" placeholder="Email" required>
+        <input type="password" id="admin-password" class="input-field" placeholder="Password" required>
+        <button class="login-btn" onclick="loginAdmin()">Login</button>
+        <span class="forgot-password" onclick="forgotPassword()">Forgot Password?</span>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyCf5U2L-YtLLOYwLdCr3g24moE8VSUmAkJ4",
+            authDomain: "forex-exchange-8421.firebaseapp.com",
+            projectId: "forex-exchange-8421",
+            storageBucket: "forex-exchange-8421.appspot.com",
+            messagingSenderId: "399357419450",
+            appId: "1:399357419450:web:b580e572b77d69bc388783",
+            measurementId: "G-XFP08Q6TKF"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Login Admin Function
+        window.loginAdmin = async function () {
+            const email = document.getElementById("admin-email").value;
+            const password = document.getElementById("admin-password").value;
+
+            if (!email || !password) {
+                alert("Please enter both email and password!");
+                return;
+            }
+
+            try {
+                // Fetch admin credentials from Firestore
+                const docRef = doc(db, "admin", "credentials");
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data.email === email && data.password === password) {
+                        alert("Login successful!");
+
+                        // ✅ Save login status in sessionStorage
+                        sessionStorage.setItem("isAdminLoggedIn", "true");
+
+                        // ✅ Redirect to Admin Dashboard (No window.location for Netlify)
+                        document.body.innerHTML = "<h2>Login Successful! Redirecting...</h2>";
+                        setTimeout(() => {
+                            location.href = "admin_dashboard.html";
+                        }, 2000);
+                    } else {
+                        alert("Incorrect Email or Password!");
+                    }
+                } else {
+                    alert("Admin credentials not found!");
+                }
+            } catch (error) {
+                alert("Login failed: " + error.message);
+            }
+        };
+
+        // Forgot Password Function
+        window.forgotPassword = function () {
+            alert("Admin password reset is only possible manually in Firebase.");
+        };
+    </script>
+</body>
+</html>

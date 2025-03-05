@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Trading Accounts</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #021a3d;
+            color: white;
+            text-align: center;
+        }
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 170, 255, 0.1);
+            padding: 15px 30px;
+            backdrop-filter: blur(10px);
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+        }
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+        .container {
+            margin-top: 30px;
+        }
+        .account-box {
+            background: rgba(0, 170, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            width: 80%;
+            margin: 10px auto;
+            box-shadow: 0 0 10px rgba(0, 170, 255, 0.5);
+            text-align: left;
+        }
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .approve-btn, .decline-btn, .delete-btn {
+            padding: 10px 20px;
+            border: none;
+            color: white;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .approve-btn {
+            background: green;
+        }
+        .decline-btn {
+            background: red;
+        }
+        .delete-btn {
+            background: darkgray;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <a href="admin_dashboard.html">Back to Dashboard</a>
+        <a href="#">Manage Trading Accounts</a>
+    </div>
+    
+    <div class="container">
+        <h1>Pending Trading Accounts</h1>
+        <div id="accounts-list"></div>
+    </div>
+
+    <script type="module">
+        // Firebase Configuration
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCf5U2LYtLLOYwLdCr3g24moE8VSUmAkJ4",
+            authDomain: "forex-exchange-8421.firebaseapp.com",
+            projectId: "forex-exchange-8421",
+            storageBucket: "forex-exchange-8421.appspot.com",
+            messagingSenderId: "399357419450",
+            appId: "1:399357419450:web:b580e572b77d69bc388783",
+            measurementId: "G-XFP08Q6TKF"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        async function loadAccounts() {
+            const accountsList = document.getElementById("accounts-list");
+            accountsList.innerHTML = "";
+
+            const querySnapshot = await getDocs(collection(db, "tradingAccounts"));
+            querySnapshot.forEach((docData) => {
+                const data = docData.data();
+                const div = document.createElement("div");
+                div.classList.add("account-box");
+                div.innerHTML = `
+                    <p><strong>Name:</strong> ${data.fullName}</p>
+                    <p><strong>City:</strong> ${data.city}</p>
+                    <p><strong>Phone:</strong> ${data.phone}</p>
+                    <p><strong>Email:</strong> ${data.email}</p>
+                    <p><strong>Bank Name:</strong> ${data.bankAccountName || "N/A"}</p>
+                    <p><strong>Bank Account Number:</strong> ${data.accountNumber || "N/A"}</p>
+                    <p><strong>IBAN Number:</strong> ${data.bankIban || "N/A"}</p>
+                    <p><strong>CNIC Number:</strong> ${data.cnicNumber}</p>
+                    <p><strong>Status:</strong> ${data.status}</p>
+                    <div class="buttons">
+                        <button class="approve-btn" onclick="approveAccount('${docData.id}')">Approve</button>
+                        <button class="decline-btn" onclick="declineAccount('${docData.id}')">Decline</button>
+                        <button class="delete-btn" onclick="deleteAccount('${docData.id}')">Delete</button>
+                    </div>
+                `;
+                accountsList.appendChild(div);
+            });
+        }
+
+        window.approveAccount = async (email) => {
+            await updateDoc(doc(db, "tradingAccounts", email), { status: "approved" });
+            alert("Account Approved!");
+            loadAccounts(); // Reload the list after approval
+        };
+
+        window.declineAccount = async (email) => {
+            await updateDoc(doc(db, "tradingAccounts", email), { status: "declined" });
+            alert("Account Declined!");
+            loadAccounts(); // Reload the list after declining
+        };
+
+        window.deleteAccount = async (email) => {
+            if (confirm("Are you sure you want to delete this account?")) {
+                await deleteDoc(doc(db, "tradingAccounts", email));
+                alert("Account Deleted!");
+                loadAccounts(); // Reload the list after deletion
+            }
+        };
+
+        loadAccounts(); // Load accounts on page load
+    </script>
+</body>
+</html>

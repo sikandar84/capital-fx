@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check Account Status</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #0A1F44, #1E3C72);
+            color: white;
+            text-align: center;
+            padding: 30px;
+        }
+        h2 { color: #FFD700; }
+        input, button, select {
+            padding: 10px;
+            font-size: 16px;
+            margin: 10px;
+            border-radius: 5px;
+            border: none;
+        }
+        input, select {
+            width: 250px;
+            text-align: center;
+        }
+        button {
+            background: #FFD700;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background: #E6C200;
+        }
+        #status-message, #withdraw-status, #deposit-status {
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        .approved { color: #28A745; }   /* Green for Approved */
+        .declined { color: #DC3545; }   /* Red for Declined */
+        .pending { color: #FFA500; }   /* Orange for Pending */
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        th { background: #FFD700; color: #1E3C72; }
+        td { color: white; }
+    </style>
+</head>
+<body>
+    <h2>Check Your Account Status</h2>
+
+    <input type="email" id="email-input" placeholder="Enter your email">
+    <select id="account-type">
+        <option value="demoAccounts">Demo Account</option>
+        <option value="tradingAccounts">Trading Account</option>
+    </select>
+    <button id="check-btn">Check Status</button>
+
+    <p id="status-message"></p>
+
+    <h2>Withdraw & Deposit Requests</h2>
+    <button id="check-transactions-btn">Check Transactions</button>
+
+    <h3>Withdraw Requests</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Amount (USD)</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody id="withdraw-table"></tbody>
+    </table>
+
+    <h3>Deposit Requests</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Amount (USD)</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody id="deposit-table"></tbody>
+    </table>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Firebase Configuration
+        const firebaseConfig = { 
+            apiKey: "AIzaSyCf5U2LYtLLOYwLdCr3g24moE8VSUmAkJ4",
+            authDomain: "forex-exchange-8421.firebaseapp.com",
+            projectId: "forex-exchange-8421",
+            storageBucket: "forex-exchange-8421.appspot.com",
+            messagingSenderId: "399357419450",
+            appId: "1:399357419450:web:b580e572b77d69bc388783",
+            measurementId: "G-XFP08Q6TKF"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Function to check account status
+        document.getElementById("check-btn").addEventListener("click", async () => {
+            const email = document.getElementById("email-input").value.trim();
+            const accountType = document.getElementById("account-type").value;
+            const statusMessage = document.getElementById("status-message");
+
+            if (email === "") {
+                statusMessage.textContent = "Please enter a valid email.";
+                statusMessage.className = "pending";
+                return;
+            }
+
+            const q = query(collection(db, accountType), where("email", "==", email));
+            const querySnapshot = await getDocs(q);
+
+            if (querySnapshot.empty) {
+                statusMessage.textContent = "No account found for this email.";
+                statusMessage.className = "pending";
+                return;
+            }
+
+            let statusText = "Unknown";
+            let statusClass = "pending";
+
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                if (data.status === "approved") {
+                    statusText = "✅ Your account has been APPROVED!";
+                    statusClass = "approved";
+                } else if (data.status === "declined") {
+                    statusText = "❌ Your account has been DECLINED!";
+                    statusClass = "declined";
+                } else {
+                    statusText = "⏳ Your account request is PENDING...";
+                    statusClass = "pending";
+                }
+            });
+
+            statusMessage.textContent = statusText;
+            statusMessage.className = statusClass;
+        });
+
+        // Function to check withdraw and deposit requests
+        document.getElementById("check-transactions-btn").addEventListener("click", async () => {
+            const email = document.getElementById("email-input").value.trim();
+            const withdrawTable = document.getElementById("withdraw-table");
+            const depositTable = document.getElementById("deposit-table");
+
+            if (email === "") {
+                alert("Please enter a valid email first.");
+                return;
+            }
+
+            // Clear tables
+            withdrawTable.innerHTML = "";
+            depositTable.innerHTML = "";
+
+            // Fetch Withdraw Requests
+            const withdrawQuery = query(collection(db, "withdrawals"), where("email", "==", email));
+            const withdrawSnapshot = await getDocs(withdrawQuery);
+
+            withdrawSnapshot.forEach((doc) => {
+                const data = doc.data();
+                const statusColor = data.status === "approved" ? "green" : data.status === "declined" ? "red" : "orange";
+                const row = `<tr><td>${data.amount}</td><td style="color: ${statusColor}; font-weight: bold;">${data.status.toUpperCase()}</td></tr>`;
+                withdrawTable.innerHTML += row;
+            });
+
+            if (withdrawSnapshot.empty) {
+                withdrawTable.innerHTML = "<tr><td colspan='2'>No withdraw requests found.</td></tr>";
+            }
+
+            // Fetch Deposit Requests
+            const depositQuery = query(collection(db, "deposits"), where("email", "==", email));
+            const depositSnapshot = await getDocs(depositQuery);
+
+            depositSnapshot.forEach((doc) => {
+                const data = doc.data();
+                const statusColor = data.status === "approved" ? "green" : data.status === "declined" ? "red" : "orange";
+                const row = `<tr><td>${data.amount}</td><td style="color: ${statusColor}; font-weight: bold;">${data.status.toUpperCase()}</td></tr>`;
+                depositTable.innerHTML += row;
+            });
+            if (depositSnapshot.empty) {
+                depositTable.innerHTML = "<tr><td colspan='2'>No deposit requests found.</td></tr>";
+            }
+        });
+
+    </script>
+</body>
+</html>

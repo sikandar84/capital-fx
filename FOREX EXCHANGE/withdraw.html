@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Withdraw Funds</title>
+    
+    <!-- Bootstrap CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #021a3d;
+            color: white;
+            text-align: center;
+            padding-top: 80px;
+        }
+
+        /* Ticker Bar */
+        .ticker-container {
+            width: 100%;
+            background: rgba(0, 170, 255, 0.2);
+            padding: 8px 0;
+            white-space: nowrap;
+            overflow: hidden;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+
+        .ticker-text {
+            display: inline-block;
+            white-space: nowrap;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            animation: tickerMove 15s linear infinite;
+        }
+
+        @keyframes tickerMove {
+            from { transform: translateX(100%); }
+            to { transform: translateX(-100%); }
+        }
+
+        /* Navbar */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 170, 255, 0.1);
+            padding: 15px 30px;
+            backdrop-filter: blur(10px);
+            position: fixed;
+            top: 30px;
+            width: 100%;
+            z-index: 999;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+        }
+
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+
+        /* Withdraw Box */
+        .withdraw-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 0 15px rgba(0, 170, 255, 0.3);
+            margin: auto;
+            margin-top: 80px;
+        }
+
+        input, button {
+            width: 80%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-size: 14px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center;
+        }
+
+        input {
+            border: none;
+        }
+
+        button {
+            background: linear-gradient(90deg, #005bbb, #00aaff);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: linear-gradient(90deg, #00aaff, #005bbb);
+            transform: scale(1.05);
+        }
+
+        /* Alert Box */
+        .alert-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            color: black;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 170, 255, 0.5);
+            display: none;
+            z-index: 1000;
+            text-align: center;
+            font-size: 16px;
+            width: 80%;
+            max-width: 300px;
+        }
+
+        .alert-box button {
+            background: #00aaff;
+            color: white;
+            border: none;
+            padding: 10px;
+            width: 100%;
+            margin-top: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .alert-box button:hover {
+            background: #005bbb;
+        }
+
+        /* Footer */
+        .footer {
+            background: rgba(0, 170, 255, 0.2);
+            padding: 10px;
+            text-align: center;
+            font-size: 14px;
+            color: white;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Ticker Bar -->
+    <div class="ticker-container">
+        <div class="ticker-text">
+            ⚡ Market Update: EUR/USD 1.0956 ▲ | BTC/USD $45,678 ▼ | Gold $2,050 ▲ | Stay tuned for more updates! ⚡
+        </div>
+    </div>
+
+    <!-- Navbar -->
+    <div class="navbar">
+        <a href="tradingaccountsuccess.html">⬅ Go Back</a>
+        <a href="#">Withdraw Funds</a>
+    </div>
+
+        <!-- Withdraw Box -->
+        <div class="withdraw-box">
+            <h2>Withdraw Funds</h2>
+            <input type="text" id="trading-account-id" placeholder="Trading Account ID" required>
+            <input type="text" id="name" placeholder="Full Name" required>
+            <input type="email" id="email" placeholder="Email" required>
+            <input type="number" id="withdraw-amount" placeholder="Enter amount ($)" required>
+            <button onclick="submitWithdrawal()">Request Withdrawal</button>
+        </div>
+    
+        <!-- Firebase & Script -->
+        <script type="module">
+            import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+            import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    
+            const firebaseConfig = {
+                apiKey: "AIzaSyCf5U2LYtLLOYwLdCr3g24moE8VSUmAkJ4",
+                authDomain: "forex-exchange-8421.firebaseapp.com",
+                projectId: "forex-exchange-8421",
+                storageBucket: "forex-exchange-8421.appspot.com",
+                messagingSenderId: "399357419450",
+                appId: "1:399357419450:web:b580e572b77d69bc388783",
+                measurementId: "G-XFP08Q6TKF"
+            };
+    
+            const app = initializeApp(firebaseConfig);
+            const db = getFirestore(app);
+    
+            window.submitWithdrawal = async () => {
+                const tradingAccountField = document.getElementById("trading-account-id");
+                const nameField = document.getElementById("name");
+                const emailField = document.getElementById("email");
+                const amountField = document.getElementById("withdraw-amount");
+    
+                if (!tradingacid.value || !nameField.value || !emailField.value || !amountField.value) {
+                    alert("Please fill all fields.");
+                    return;
+                }
+    
+                try {
+                    await setDoc(doc(db, "withdrawals", Date.now().toString()), {
+                        tradingAccountId: tradingacid.value,
+                        name: nameField.value,
+                        email: emailField.value,
+                        amount: amountField.value,
+                        status: "pending"
+                    });
+    
+                    document.getElementById("alert-box").style.display = "block";
+    
+                    tradingAccountField.value = "";
+                    nameField.value = "";
+                    emailField.value = "";
+                    amountField.value = "";
+                } catch (error) {
+                    alert("Error processing withdrawal.");
+                }
+            };
+    
+            window.closeAlert = () => {
+                document.getElementById("alert-box").style.display = "none";
+            };
+        </script>
+    
