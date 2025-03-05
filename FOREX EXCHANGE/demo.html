@@ -30,8 +30,8 @@
         }
         input, button {
             width: 100%;
-            margin: 10px 0;
-            padding: 12px;
+            margin: 10px -8px;
+            padding: 10px;
             border: none;
             border-radius: 8px;
             font-size: 16px;
@@ -97,7 +97,7 @@
 
         document.getElementById("amount-usd").addEventListener("input", function() {
             const usd = parseFloat(this.value) || 0;
-            const exchangeRate = 280;
+            const exchangeRate = 300;
             document.getElementById("amount-pkr").textContent = (usd * exchangeRate).toFixed(2);
         });
 

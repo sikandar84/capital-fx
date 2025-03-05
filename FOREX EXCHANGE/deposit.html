@@ -100,6 +100,12 @@
                 width: 100%;
             }
         }
+        #dollar-amount {
+    font-size: 18px;
+    margin-top: 10px;
+    color: #00ff99;
+}
+
     </style>
 </head>
 <body>
@@ -112,6 +118,8 @@
             <input type="text" id="bank-name" placeholder="Bank Name" required>
             <input type="text" id="account-number" placeholder="Account Number" required>
             <input type="number" id="deposit-amount" placeholder="Enter amount (PKR)" required>
+            <p id="dollar-amount">Equivalent in USD: $0</p>
+
             <input type="file" id="deposit-slip" accept="image/*" required>
             <button onclick="submitDeposit()">Submit Deposit</button>
         </div>
@@ -222,6 +230,12 @@
                 alert("Error processing deposit.");
             }
         };
+        document.getElementById("deposit-amount").addEventListener("input", function() {
+    const pkrAmount = this.value;
+    const usdAmount = (pkrAmount / 300).toFixed(2);
+    document.getElementById("dollar-amount").innerText = `Equivalent in USD: $${usdAmount}`;
+});
+
     </script>
 </body>
 </html>
