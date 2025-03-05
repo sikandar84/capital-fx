@@ -161,7 +161,7 @@
             formData.append("metadata", new Blob([JSON.stringify(metadata)], { type: "application/json" }));
             formData.append("file", file);
 
-            const accessToken = "ya29.a0AeXRPp5o3qgvzP2W5Uu4ewu695xIgeRH17SIIGUtL_aXKjvIyFbxjBKm7vt4raQj_mCORdmAA7lujEG5HHtWh9_cTpuHeoK3KSFQxZNAYDFgrtL30duTd6x6HZ5CW4mB-c0lHpNw9D1TyFnyI4tguijmDMV3reV0klk4fJtfaCgYKAboSARESFQHGX2MiF8MxhMQxZ1VLYRkC27Vi0w0175"; 
+            const accessToken = "ya29.a0AeXRPp6lnyrR3cgoziduXGq1GA2gQ9r84j0y8CTk08-4BgHiQOHSt8BcxAps4CVkCLUdSXFjtGVb7Pe8voeMuFKvogAM6ZiC-wbOZzRxvGpHU5yiJ0XkZcPm6FIoe_28r-EMr3nDOvvMhJ9dmJ7kma6SXmWjPmWHSH-EbUkYaCgYKAWESARESFQHGX2Miog-Bm1ItbFvn-lWvH4gK4w0175"; 
 
             const response = await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart", {
                 method: "POST",
@@ -177,7 +177,7 @@
 
         // Make the file public
         async function makeFilePublic(fileId) {
-            const accessToken = "ya29.a0AeXRPp5o3qgvzP2W5Uu4ewu695xIgeRH17SIIGUtL_aXKjvIyFbxjBKm7vt4raQj_mCORdmAA7lujEG5HHtWh9_cTpuHeoK3KSFQxZNAYDFgrtL30duTd6x6HZ5CW4mB-c0lHpNw9D1TyFnyI4tguijmDMV3reV0klk4fJtfaCgYKAboSARESFQHGX2MiF8MxhMQxZ1VLYRkC27Vi0w0175"; 
+            const accessToken = "ya29.a0AeXRPp6lnyrR3cgoziduXGq1GA2gQ9r84j0y8CTk08-4BgHiQOHSt8BcxAps4CVkCLUdSXFjtGVb7Pe8voeMuFKvogAM6ZiC-wbOZzRxvGpHU5yiJ0XkZcPm6FIoe_28r-EMr3nDOvvMhJ9dmJ7kma6SXmWjPmWHSH-EbUkYaCgYKAWESARESFQHGX2Miog-Bm1ItbFvn-lWvH4gK4w0175"; 
 
             await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}/permissions`, {
                 method: "POST",
